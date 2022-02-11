@@ -120,8 +120,8 @@ services:
       # Enable the Dashboard and API
       - --api
 
-      #  entrypoints additional services
-      - --entrypoints.service-01.address=:9001
+      #  entrypoints defines ports for services
+      - --entrypoints.traefik-ui.address=:9001
       - --entrypoints.service-02.address=:9002
 
 
