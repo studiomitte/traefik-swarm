@@ -1,0 +1,36 @@
+########################################################
+# example docker compose file for swarm mode
+#########################################################
+
+version: "3.9"
+
+networks:
+  traefik-public:
+    external: true
+    
+services:
+
+  my-service:
+    image: MY_DOCKER_IMAGE
+
+    networks:
+      - traefik-public
+
+    deploy:
+
+        labels:
+           - "traefik.enable=true"
+           - "traefik.http.routers.my-service.rule=Host(`my-domain.com`, `www.my-domain.com`)"
+           - "traefik.http.routers.my-service.entrypoints=http"
+           - "traefik.http.routers.my-service.middlewares=https-redirect"
+           - "traefik.http.routers.my-service-https.rule=Host(`my-domain.com`, `www.my-domain.com`)"
+           - "traefik.http.routers.my-service-https.entrypoints=https"
+
+           # force redirect to www
+           - "traefik.http.routers.my-service-https.middlewares=non-www-to-www"
+
+           - "traefik.http.routers.my-service-https.tls=true"
+           - "traefik.http.routers.my-service-https.tls.certresolver=le"
+           - "traefik.docker.network=traefik-public"
+           - "traefik.constraint-label=traefik-public"
+           - "traefik.http.services.my-service-https.loadbalancer.server.port=80"
