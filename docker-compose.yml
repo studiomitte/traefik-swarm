@@ -120,11 +120,10 @@ services:
       # Enable the Dashboard and API
       - --api
 
-      # SMDM entrypoints additional services
-      - --entrypoints.portainer.address=:9001
-      - --entrypoints.kibana.address=:9002
-      - --entrypoints.rabbitmq.address=:9003
-      - --entrypoints.traefik-ui.address=:9004
+      #  entrypoints additional services
+      - --entrypoints.service-01.address=:9001
+      - --entrypoints.service-02.address=:9002
+
 
     networks:
       # Use the public network created to be shared between Traefik and
