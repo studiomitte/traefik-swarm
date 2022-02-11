@@ -70,8 +70,9 @@ docker stack deploy -c docker-compose.yml traefik
 
 Access Logs & Rotation
 ----------------------
+The example has access log enabled and will log all traefik to a mounted host directory, log rotation on the host system rotates the logs periodically.
 
-*   Create directory `/var/log/traefik` and mount it in traefik docker-compose file (will be created by init script)
+*   Create directory, e.g. `/var/log/traefik` and mount it in traefik docker-compose file
 
 ```
     volumes:
