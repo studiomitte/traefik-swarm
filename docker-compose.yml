@@ -79,15 +79,8 @@ services:
           cpus: '0.25'
           memory: 256M
       update_config:
-        order: start-first
-        failure_action: rollback
-        delay: 10s
-      rollback_config:
-        parallelism: 0
         order: stop-first
-      restart_policy:
-        condition: any
-        delay: 5s
+   
 
     volumes:
       # Add Docker as a mounted volume, so that Traefik can read the labels of other services
