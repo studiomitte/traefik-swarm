@@ -8,7 +8,7 @@ services:
 
   traefik:
     # Use the latest Traefik image
-    image: traefik:v2.6
+    image: traefik:v2.9
     ports:
       # Host mode is essential to work with IPv6
       # Listen on port 80, default for HTTP, necessary to redirect to HTTPS
@@ -111,7 +111,7 @@ services:
       - --certificatesresolvers.le.acme.tlschallenge=true
       # Enable the access log, with HTTP requests
       - --accesslog.bufferingsize=100
-      - --accesslog.filepath=${TRAEFIK_LOG_DIR}traefik-access.log
+      - --accesslog.filepath=/var/log/traefik/traefik-access.log
       # Enable the Traefik log, for configurations and errors
       - --log
       # Enable the Dashboard and API
