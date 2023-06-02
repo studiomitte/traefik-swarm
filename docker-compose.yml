@@ -112,6 +112,14 @@ services:
       # Enable the access log, with HTTP requests
       - --accesslog.bufferingsize=100
       - --accesslog.filepath=/var/log/traefik/traefik-access.log
+      # keep headers and user agents in logs
+      - --accesslog.fields.defaultmode=keep
+      - --accesslog.fields.names.ClientUsername=drop
+      - --accesslog.fields.headers.defaultmode=keep
+      - --accesslog.fields.headers.names.User-Agent=keep
+      - --accesslog.fields.headers.names.Authorization=drop
+      - --accesslog.fields.headers.names.Content-Type=keep
+      
       # Enable the Traefik log, for configurations and errors
       - --log
       # Enable the Dashboard and API
