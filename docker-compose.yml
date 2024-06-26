@@ -1,14 +1,8 @@
-#######################################################
-# traefik reverse proxy service for swarm mode
-#######################################################
-
-version: '3.9'
-
 services:
 
   traefik:
     # Use the latest Traefik image
-    image: traefik:v2.9
+    image: traefik:v3.0
     ports:
       # Host mode is essential to work with IPv6
       # Listen on port 80, default for HTTP, necessary to redirect to HTTPS
@@ -21,9 +15,19 @@ services:
         published: 443
         mode: host
         protocol: tcp
-      # additional ports
+
+      # portainer
       - '9001:9001'
+      # elasticsearch / kibana
       - '9002:9002'
+      # traefik ui
+      - '9004:9004'
+
+      # phpmyadmin
+      - '9005:9005'
+
+      # mailhog
+      - '8025:8025'
 
     deploy:
       mode: global
@@ -67,6 +71,9 @@ services:
         # Define the port inside of the Docker service to use
         - traefik.http.services.traefik-public.loadbalancer.server.port=8080
 
+        # when running in Docker Swarm Mode, use swarm loadbalancer!!
+        # - traefik.docker.lbswarm=true
+
         # Redirect non-www to www middleware
         - "traefik.http.middlewares.non-www-to-www.redirectregex.regex=^https?://(?:www\\.)?(.+)"
         - "traefik.http.middlewares.non-www-to-www.redirectregex.permanent=true"
@@ -78,9 +85,9 @@ services:
         reservations:
           cpus: '0.25'
           memory: 256M
+
       update_config:
         order: stop-first
-   
 
     volumes:
       # Add Docker as a mounted volume, so that Traefik can read the labels of other services
@@ -88,17 +95,21 @@ services:
       # Mount the volume to store the certificates
       - traefik-public-certificates:/certificates
       # Mount log folder
-      - /var/log/traefik:/var/log/traefik
+      - ${TRAEFIK_LOG_DIR}:/var/log/traefik
+      # Mount dynamic config
+      - ./config.yml:/etc/traefik/config.yml:ro
+
     command:
-      # Enable Docker in Traefik, so that it reads labels from Docker services
-      - --providers.docker
-      - --providers.docker.network=traefik-public
-     # Add a constraint to only use services with the label "traefik.constraint-label=traefik-public"
-      - --providers.docker.constraints=Label(`traefik.constraint-label`, `traefik-public`)
+
+
+      # Enable Docker Swarm  in Traefik, so that it reads labels from Docker services
+      - --providers.swarm.endpoint=unix:///var/run/docker.sock
+      # Add a constraint to only use services with the label "traefik.constraint-label=traefik-public"
+      - --providers.swarm.network=traefik-public
+      # Add a constraint to only use services with the label "traefik.constraint-label=traefik-public"
+      - --providers.swarm.constraints=Label(`traefik.constraint-label`, `traefik-public`)
       # Do not expose all Docker services, only the ones explicitly exposed
-      - --providers.docker.exposedbydefault=false
-      # Enable Docker Swarm mode
-      - --providers.docker.swarmmode
+      - --providers.swarm.exposedbydefault=false
       # Create an entrypoint "http" listening on address 80
       - --entrypoints.http.address=:80
       # Create an entrypoint "https" listening on address 443
@@ -112,22 +123,24 @@ services:
       # Enable the access log, with HTTP requests
       - --accesslog.bufferingsize=100
       - --accesslog.filepath=/var/log/traefik/traefik-access.log
-      # keep headers and user agents in logs
-      - --accesslog.fields.defaultmode=keep
-      - --accesslog.fields.names.ClientUsername=drop
-      - --accesslog.fields.headers.defaultmode=keep
-      - --accesslog.fields.headers.names.User-Agent=keep
-      - --accesslog.fields.headers.names.Authorization=drop
-      - --accesslog.fields.headers.names.Content-Type=keep
-      
       # Enable the Traefik log, for configurations and errors
       - --log
       # Enable the Dashboard and API
       - --api
 
-      #  entrypoints defines ports for services
-      - --entrypoints.traefik-ui.address=:9001
-      - --entrypoints.service-02.address=:9002
+      # SMDM entrypoints additional services
+      - --entrypoints.portainer.address=:9001
+      - --entrypoints.kibana.address=:9002
+      - --entrypoints.rabbitmq.address=:9003
+      - --entrypoints.traefik-ui.address=:9004
+      - --entrypoints.phpmyadmin.address=:9005
+      - --entrypoints.mailhog.address=:8025
+
+      # forward x-forward-host to container
+      - --entrypoints.http.proxyProtocol.trustedIPs=${IP_RANGE}
+      - --entrypoints.http.forwardedHeaders.trustedIPs=${IP_RANGE}
+      - --entrypoints.https.proxyProtocol.trustedIPs=${IP_RANGE}
+      - --entrypoints.https.forwardedHeaders.trustedIPs=${IP_RANGE}
 
 
     networks:
