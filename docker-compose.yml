@@ -144,7 +144,8 @@ services:
 
 
       # adjust responding timeouts (large uploads) - values in seconds, 0 means no limit
-      - --entrypoints.https.transport.respondingTimeouts.readTimeout=0
+      # readTimeout may cause upload aborts 
+      - --entrypoints.https.transport.respondingTimeouts.readTimeout=600
       - --entrypoints.https.transport.respondingTimeouts.writeTimeout=0
       - --entrypoints.https.transport.respondingTimeouts.idleTimeout=0
 
