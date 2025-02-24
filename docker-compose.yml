@@ -143,6 +143,12 @@ services:
       - --entrypoints.https.forwardedHeaders.trustedIPs=${IP_RANGE}
 
 
+      # adjust responding timeouts (large uploads) - values in seconds, 0 means no limit
+      - --entrypoints.https.transport.respondingTimeouts.readTimeout=0
+      - --entrypoints.https.transport.respondingTimeouts.writeTimeout=0
+      - --entrypoints.https.transport.respondingTimeouts.idleTimeout=0
+
+
     networks:
       # Use the public network created to be shared between Traefik and
       # any other service that needs to be publicly available with HTTPS
