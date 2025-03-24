@@ -16,6 +16,12 @@ services:
         mode: host
         protocol: tcp
 
+      # http3
+      - target: 443
+        published: 443
+        mode: host
+        protocol: udp        
+
       # portainer
       - '9001:9001'
       # elasticsearch / kibana
@@ -148,6 +154,10 @@ services:
       - --entrypoints.https.transport.respondingTimeouts.readTimeout=600
       - --entrypoints.https.transport.respondingTimeouts.writeTimeout=0
       - --entrypoints.https.transport.respondingTimeouts.idleTimeout=0
+
+      # enable http3 support - be sure to open udp port in firewall!
+      - --experimental.http3=true
+      - --entrypoints.https.http3
 
 
     networks:
